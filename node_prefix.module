@@ -1,0 +1,97 @@
+<?php
+ 
+/**
+ * @file
+ * Custom functionality for a node_prefix module
+ */
+ 
+/**
+ * Implements hook_help().
+ */
+function node_prefix_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#node_prefix' :
+      $ret_val = '<h3>' . t('About') . '</h3>';
+      $ret_val.= '<p>' . t('tralala') . '</p>';
+      return $ret_val;
+      break;
+  }
+}
+ 
+/**
+ * Implements hook_menu().
+ */
+function node_prefix_menu() {
+  $items = array();
+ 
+  // Adrmin confuguration group.
+  $items['admin/config/node_prefix'] = array(
+    'title' => 'Node Prefix',
+    'description' => 'Same as title',
+    'access callback' => TRUE,
+    'page callback' => 'drupal_get_form',  
+  );
+ 
+  // Admin configuration - Settings.
+  $items['admin/config/node_prefix/manage'] = array(
+    'title' => 'Node Prefix Settings',
+    'description' => 'tralala',
+    'access callback' => TRUE,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('node_prefix_settings_form')
+  );
+  return $items;
+}
+ 
+/**
+ * Implements hook_form().
+ */
+function node_prefix_settings_form($node, &$form_state) {
+  $form = array();
+  $form['node_id'] = array(
+    '#title' => t('Insert Node Id'),
+    '#type' => 'textfield',
+    '#description' => t('las sa fie')
+  );
+  $form['prefix'] = array(
+    '#title' => t('Insert title prefix'),
+    '#type' => 'textfield',
+    '#description' => t('las sa fie')
+  );
+  //////////////////////
+  $form['color_options']=array(
+     '#type'=>'value',
+	 '#value'=>array(t('prefix'),t('suffix'))
+	 
+	 );
+  /////////////////////
+  $form['color']['favorite_color']=array(
+     '#title'=>t('Favorite Color'),
+     '#type'=>'select',
+     '#description'=>t('Please select your favorite color.'),
+     '#options'=>$form['color_options']['#value'] 	 
+  );
+  
+
+  
+  
+  
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add'),
+    '#submit' => array('node_prefix_save_prefix'),
+  );
+  return $form;
+}
+ 
+function node_prefix_save_prefix($form, &$form_state) {
+  dpm($form_state);
+  $query = "SELECT title FROM {node} WHERE node.nid = :nid";
+  $ret = db_query($query, array(':nid' => $form_state['values']['node_id']))->fetchObject();
+  dpm($ret);
+  $title = $form_state['values']['prefix'].$ret->title;
+  db_update('node')
+  ->fields(array('title' => $title))
+  ->condition('nid', $form_state['values']['node_id'])
+  ->execute();
+}
